@@ -1,0 +1,1 @@
+def cifar10_color(X):

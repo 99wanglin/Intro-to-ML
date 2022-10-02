@@ -43,12 +43,12 @@ testdatadict = unpickle('./cifar-10-python/cifar-10-batches-py/test_batch')
 
 test_X = testdatadict['data']
 test_Y = testdatadict['labels']
+test_Y = np.array(test_Y)
 
 # X = X.reshape(10000, 3, 32, 32).transpose(0,2,3,1).astype("uint8")
 Y = np.array(Y)
 
 def cifar10_color(X, num_of_images):
-    # print(X.shape)
     new_X = np.reshape(X, (num_of_images, 3, -1))
     return resize(new_X, (num_of_images, 3, 1))
     # outputs Xp
@@ -146,12 +146,9 @@ def cifar10_classifier_bayes(x, mu, sigma, p):
 ######################## QUESTION 3 ########################
 
 def cifar10_2x2_color(X, num_of_images):
-    
     new_X = np.reshape(X, (num_of_images, 3, -1))
     print(new_X)
     return resize(new_X, (num_of_images, 3, 2, 2))
-
-cifar10_2x2_color(X[0], 1)
 
 def cifar_10_bayes_learn2(Xf, Y):
     mu_output = np.empty((10, 12))
@@ -190,53 +187,59 @@ def cifar_10_bayes_learn2(Xf, Y):
 # print('resize', resize(new_image, (3, 2, 2)))
 # print('resized', cifar10_color(X[:1000], 1000))
 
+def class_acc(pred, gt):
+    # if pred.shape[0] == gt.shape[0]:
+    num_of_pts = pred.shape[0]
+    # else:
+    #     print('arrays do not match')
+    #     return
+    counter = 0
+    for i in range(num_of_pts):
+        if pred[i] == gt[i]:
+            counter += 1
+    return (counter / num_of_pts) * 100
 
 # # Change training_num to set how many datasets to train model
-# training_num = 10000
-# # print(X.shape)
-# # Xp = cifar10_color(X[:training_num], training_num)
-# Xp = cifar10_color(all_data['data'], 50000)
+# training_num = 200
+# print(X.shape)
+# Xp = cifar10_color(X[:training_num], training_num)
 
-# # For question 1
-# # mu, sigma, p = cifar_10_naivebayes_learn(Xp, Y[:training_num])
-# mu, sigma, p = cifar_10_naivebayes_learn(Xp, all_data['labels'])
+# For question 1
+def qn1(Xp, test_num):
+    # mu, sigma, p = cifar_10_naivebayes_learn(Xp, Y[:training_num])
+    mu, sigma, p = cifar_10_naivebayes_learn(Xp, all_data['labels'])
+    result = np.empty((test_num,))
+    for i in range(test_num):
+        result[i] = cifar10_classifier_naivebayes(test_X[i], mu, sigma, p)
+    print('qn1: ',class_acc(result, test_Y[:test_num]),'%')
 
-# # For question 2
-# # mu, sigma, p = cifar_10_bayes_learn(Xp, Y[:training_num])
-# mu2, sigma2, p2 = cifar_10_bayes_learn(Xp, all_data['labels'])
+# For question 2
+def qn2(Xp, test_num):
+    # mu2, sigma2, p2 = cifar_10_bayes_learn(Xp, Y[:training_num])
+    mu, sigma, p = cifar_10_bayes_learn(Xp, all_data['labels'])
+    result2 = np.empty((test_num,))
+    for i in range(test_num):
+    # For question 1
+        result2[i] = cifar10_classifier_naivebayes(test_X[i], mu, sigma, p)
+    print('qn2: ',class_acc(result2, test_Y[:test_num]),'%')
 
-# # Change test_num to set how many datasets to predict labels for
-# test_num = 10000
-# result = np.empty((test_num,))
-# result2 = np.empty((test_num,))
-# for i in range(test_num):
-#     # For question 1
-#     result[i] = cifar10_classifier_naivebayes(test_X[i], mu, sigma, p)
+# For question 3
+def qn3():
+    Xf = cifar10_2x2_color(X[:10], 10)
+    mu, sigma, p = cifar_10_bayes_learn2(Xf, Y[:2])
+    
 
-#     # For question 2
-#     result2[i] = cifar10_classifier_bayes(test_X[i], mu2, sigma2, p2)
-# # print(result)
+# Change test_num to set how many datasets to predict labels for
+test_num = 10000
+Xp = cifar10_color(all_data['data'], 50000)
+qn1(Xp, test_num)
+qn2(Xp, test_num)
 
-# def class_acc(pred, gt):
-#     # if pred.shape[0] == gt.shape[0]:
-#     num_of_pts = pred.shape[0]
-#     # else:
-#     #     print('arrays do not match')
-#     #     return
-#     counter = 0
-#     for i in range(num_of_pts):
-#         if pred[i] == gt[i]:
-#             counter += 1
-#     return (counter / num_of_pts) * 100
+Xf = cifar10_2x2_color(X[:10], 10)
 
-# # print(class_acc(result, test_Y[:test_num]),'%')
-# # print('qn1: ',class_acc(result, test_Y[:test_num]),'%')
-# # print('qn2: ',class_acc(result2, test_Y[:test_num]),'%')
-# print('qn1: ',class_acc(result, all_data['labels']),'%')
-# print('qn2: ',class_acc(result2, all_data['labels']),'%')
-# toc = time.process_time()
-# print(toc - tic)
 
+toc = time.process_time()
+print(toc - tic)
 
 
 # def cifar10_classifer_random(x):
@@ -269,5 +272,3 @@ def cifar_10_bayes_learn2(Xf, Y):
 # #         plt.imshow(X[i])
 # #         plt.title(f"Image {i} label={label_names[Y[i]]} (num {Y[i]})")
 # #         plt.pause(1)
-
-
